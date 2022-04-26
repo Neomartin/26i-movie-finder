@@ -1,5 +1,6 @@
-const KEY = `f7da3dc6288c269c60ef7c5ed3c3767c`;
-const URL = 'https://api.themoviedb.org/3/movie/top_rated?api_key=f7da3dc6288c269c60ef7c5ed3c3767c';
+const URL_API_KEY = `api_key=f7da3dc6288c269c60ef7c5ed3c3767c`; 
+const BASE_URL = 'https://api.themoviedb.org/3';
+
 let movies = [];
 const movieListContainer = document.getElementById('movies-list')
 const launcher = document.getElementById('launcher')
@@ -10,18 +11,17 @@ launcher.addEventListener('click', () => myModal.toggle(modal))
 console.time()
 
 function getTopRatedMovies() {
-
-    fetch(URL)
+    fetch(`${BASE_URL}/movie/top_rated?${URL_API_KEY}`)
         .then((res) => res.json())
         .then((data) => {
             movies = data.results;
-            console.log(movies)
-            swal("Good job!", "You clicked the button!", "success");
+            console.log(data)
+            // swal("Good job!", "You clicked the button!", "success");
             renderMovies(movies);
         })
-    // .catch((error) => {
-    //     console.log(`ERROR AL OBTENER PELICULAS`, error)
-    // })
+    .catch((error) => {
+        console.error(`ERROR AL OBTENER PELICULAS`, error)
+    })
 }
 
 getTopRatedMovies();
@@ -32,7 +32,7 @@ function renderMovies(movies) {
     movies.forEach(movie => {
         movieListContainer.innerHTML += `<div class="col-4 d-flex">
                 <div class="card ">
-                <img src="${movieImg + movie.backdrop_path}" class="card-img-top" alt="...">
+                <img src="${movieImg + movie.backdrop_path}" class="card-img-top" alt="..." loading='lazy'>
                 <div class="card-body text-dark">
                     <h5 class="card-title">${movie.title}</h5>
                     <p class="card-text">${movie.overview}</p>
@@ -45,6 +45,23 @@ function renderMovies(movies) {
     })
 }
 
-fetch(`https://api.themoviedb.org/3/movie/680/images?api_key=f7da3dc6288c269c60ef7c5ed3c3767c`)
-    .then(r => r.json())
-    .then(images => console.log(images))
+//Aprieto el botón buscar entonces ejecuto la función buscar películas
+//Tengo obtener la referencia al elemento input
+const searchInputHTML = document.getElementById('search-movie')
+//Tengo que acceder al valor del mismo
+function searchMovie(e) {
+    e.preventDefault()
+    const queryInput = searchInputHTML.value;
+    if(queryInput.lenght <= 3) return;
+
+    fetch(`${BASE_URL}/search/movie?${URL_API_KEY}&query=${queryInput}`)
+        .then(res => res.json())
+        .then(moviesFromAPI => {
+            const newMovies = moviesFromAPI.results;
+            renderMovies(newMovies)
+        });
+}
+
+searchInputHTML.addEventListener('keyup', (event)=> {
+    if(event.target.value === '') getTopRatedMovies()
+})

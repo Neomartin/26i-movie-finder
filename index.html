@@ -16,8 +16,12 @@
     <div class="container">
         <h1 class="text-primary">THE MOVIE DATABASE API</h1>
         <div class="mb-3">
+          <form action="" id="searchMovie" onsubmit="searchMovie(event)">
             <label for="search-box">Buscar película</label>
-            <input type="text" id="search-box" class="form-control" placeholder="Ingrese el nombre de la película">
+            <input type="text" id="search-movie" class="form-control" placeholder="Ingrese el nombre de la película" minlength="4" required>
+            <button class="btn btn-success" type="submit">Buscar</button>
+          </form>
+            
         </div>
 
         <div class="row g-2" id="movies-list">
