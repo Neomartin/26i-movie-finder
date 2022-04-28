@@ -4,8 +4,9 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 let movies = [];
 const movieListContainer = document.getElementById('movies-list')
 const launcher = document.getElementById('launcher')
-const modal = document.getElementById('exampleModal')
-var myModal = new bootstrap.Modal(modal)
+const modal = document.getElementById('exampleModal');
+
+var myModal = new bootstrap.Modal(modal);
 
 launcher.addEventListener('click', () => myModal.toggle(modal))
 console.time()
@@ -50,18 +51,57 @@ function renderMovies(movies) {
 const searchInputHTML = document.getElementById('search-movie')
 //Tengo que acceder al valor del mismo
 function searchMovie(e) {
+    //Prevengo el comportamiento por defecto del submit en un formulario
     e.preventDefault()
-    const queryInput = searchInputHTML.value;
-    if(queryInput.lenght <= 3) return;
-
-    fetch(`${BASE_URL}/search/movie?${URL_API_KEY}&query=${queryInput}`)
-        .then(res => res.json())
-        .then(moviesFromAPI => {
-            const newMovies = moviesFromAPI.results;
-            renderMovies(newMovies)
-        });
+    // Obtengo el valor actual del input
+    
+    //Realizo la petición a la API de MovieDB
+    getMovieSearchAPI()
 }
 
+// Escuchó el evento keyup en el input y cuando sea una string vacía obtengo las películas mejor valoradas 
 searchInputHTML.addEventListener('keyup', (event)=> {
-    if(event.target.value === '') getTopRatedMovies()
+    if(event.wich === 13) getMovieSearchAPI()
+    if(event.target.value === '') getTopRatedMovies();
 })
+
+function getMovieSearchAPI() {
+    const queryInput = searchInputHTML.value;
+    //Cláusula guarda para evitar realizar búsquedas de películas cuando el texto colodado sea menor a 4 caractéres
+    if(queryInput.lenght <= 3) return;
+    fetch(`${BASE_URL}/search/movie?${URL_API_KEY}&query=${queryInput}`)
+    .then(res => res.json())
+    .then(moviesFromAPI => {
+        myModal.toggle(modal)
+        swal({
+            title: "Películas obtenidas", 
+            text: `Se obtuvieron correctamente un total de ${moviesFromAPI.total_results} películas`, 
+            icon: 'info',
+            timer: 2000,    
+        })
+        //Accedo a la respuesta de la API obtengo las películas
+        const newMovies = moviesFromAPI.results;
+        // Pinto las películas en el HTML
+        renderMovies(newMovies)
+    }).catch((error)=> {
+        swal("Errror al cargar las películas", "No se pudieron obtener películas", "error")
+    });
+}
+
+function register(event) {
+    const el = event.target.elements;
+    console.log(el)
+    console.log(event)
+    event.preventDefault();
+    params = {
+        from_name: 'neomartinr@gmail.com',
+        userName:  el.userName.value,
+        title: '<h1 style="color: blue">Bienvenido a RC School</h1>',
+        message: `Su registro en la plataforma ha sido correcto, ahora deberá esperar a que su cuenta sea activada`,
+        email: el.email.value,
+        reply_to: `neomartinr@gmail.com`
+    }
+    emailjs.send('service_n81oy5x', 'template_gu1z1ad', params)
+        .then((resp)=> swal("Subscripción correcta", "Se realizó correctamente la subscripción al servicio de notificaciones", "success"))
+        .catch((error) => swal("Error", "No se pudo enviar el correo", "error"))
+}
